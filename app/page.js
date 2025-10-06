@@ -120,21 +120,21 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
+    <div className="flex flex-col items-center justify-center min-h-screen  ">
       <h1 className="text-3xl font-bold mb-6">🎥 ZegoCloud Video Call</h1>
 
       <input
         value={userName}
         onChange={(e) => setUserName(e.target.value)}
         placeholder="Enter your name"
-        className="p-2 rounded mb-3 text-black"
+        className="p-2 rounded mb-3 text-black border-2 border-gray-300"
       />
 
       <input
         value={roomId}
         onChange={(e) => setRoomId(e.target.value)}
         placeholder="Enter Room ID"
-        className="p-2 rounded mb-3 text-black"
+        className="p-2 rounded mb-3 text-black border-2 border-gray-300"
       />
 
       <button
