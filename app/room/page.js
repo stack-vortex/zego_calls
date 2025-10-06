@@ -2,13 +2,11 @@
 
 import { useEffect, useRef, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import dynamic from 'next/dynamic';
+
 
 // Dynamically import ZegoUIKitPrebuilt to prevent SSR issues
-const ZegoUIKitPrebuilt = dynamic(
-  () => import('@zegocloud/zego-uikit-prebuilt').then((mod) => mod.ZegoUIKitPrebuilt),
-  { ssr: false }
-);
+import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
+
 
 function RoomContent() {
   const router = useSearchParams();
@@ -27,9 +25,12 @@ function RoomContent() {
   useEffect(() => {
     if (!roomId || !containerRef.current || !isMounted || typeof window === 'undefined') return;
 
-    const appID = process.env.NEXT_PUBLIC_ZEGO_APP_ID; // 🟢 Replace with your Zego App ID
+    const appID = Number(process.env.NEXT_PUBLIC_ZEGO_APP_ID); // 🟢 Replace with your Zego App ID
     const serverSecret = process.env.NEXT_PUBLIC_ZEGO_SERVER_SECRET; // ⚠️ For testing only!
 
+
+
+    console.log('appID, serverSecret', appID, serverSecret);
     const userID = Date.now().toString();
     const userName = user || 'Guest_' + userID;
 
