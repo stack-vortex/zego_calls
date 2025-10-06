@@ -1,24 +1,34 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useRef, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 
-export default function RoomPage() {
+// Dynamically import ZegoUIKitPrebuilt to prevent SSR issues
+const ZegoUIKitPrebuilt = dynamic(
+  () => import('@zegocloud/zego-uikit-prebuilt').then((mod) => mod.ZegoUIKitPrebuilt),
+  { ssr: false }
+);
+
+function RoomContent() {
   const router = useSearchParams();
   // const { roomId, user } = router;
   const roomId = router.get('roomId');
   const user = router.get('user');
   const containerRef = useRef(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   console.log('room id , user', roomId, user);
   
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
-    if (!roomId || !containerRef.current) return;
+    if (!roomId || !containerRef.current || !isMounted || typeof window === 'undefined') return;
 
-    const appID = process.env.ZEGO_APP_ID; // 🟢 Replace with your Zego App ID
-    const serverSecret = process.env.ZEGO_SERVER_SECRET; // ⚠️ For testing only!
+    const appID = process.env.NEXT_PUBLIC_ZEGO_APP_ID; // 🟢 Replace with your Zego App ID
+    const serverSecret = process.env.NEXT_PUBLIC_ZEGO_SERVER_SECRET; // ⚠️ For testing only!
 
     const userID = Date.now().toString();
     const userName = user || 'Guest_' + userID;
@@ -38,14 +48,34 @@ export default function RoomPage() {
       sharedLinks: [
         {
           name: 'Copy Link',
-          url: `${window.location.origin}/room/${roomId}`,
+          url: typeof window !== 'undefined' ? `${window.location.origin}/room?roomId=${roomId}` : `/room?roomId=${roomId}`,
         },
       ],
       scenario: {
         mode: ZegoUIKitPrebuilt.VideoConference, // VideoConference or OneONoneCall
       },
     });
-  }, [roomId, user]);
+  }, [roomId, user, isMounted]);
+
+  if (!isMounted) {
+    return (
+      <div className="w-screen h-screen flex items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
 
   return <div ref={containerRef} className="w-screen h-screen" />;
+}
+
+export default function RoomPage() {
+  return (
+    <Suspense fallback={
+      <div className="w-screen h-screen flex items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    }>
+      <RoomContent />
+    </Suspense>
+  );
 }
